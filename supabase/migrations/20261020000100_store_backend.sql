@@ -2,6 +2,7 @@
 -- Run this migration in the Supabase SQL editor or with the Supabase CLI.
 
 create schema if not exists extensions;
+create schema if not exists private;
 create extension if not exists pgcrypto with schema extensions;
 
 create table if not exists public.profiles (
@@ -103,6 +104,8 @@ create table if not exists public.order_items (
 create index if not exists products_storefront_idx on public.products (state, category, created_at desc);
 create index if not exists orders_profile_created_idx on public.orders (profile_id, created_at desc);
 create index if not exists order_items_order_idx on public.order_items (order_id);
+create index if not exists order_items_product_idx on public.order_items (product_id);
+create index if not exists profiles_role_created_idx on public.profiles (role, created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -161,7 +164,7 @@ select id, coalesce(email, ''), coalesce(raw_user_meta_data ->> 'full_name', '')
 from auth.users
 on conflict (id) do update set email = excluded.email;
 
-create or replace function public.is_store_admin()
+create or replace function private.is_store_admin()
 returns boolean
 language sql
 stable
@@ -183,18 +186,18 @@ alter table public.order_items enable row level security;
 drop policy if exists "Customers read their profile" on public.profiles;
 create policy "Customers read their profile" on public.profiles
 for select to authenticated
-using (id = (select auth.uid()) or public.is_store_admin());
+using (id = (select auth.uid()) or (select private.is_store_admin()));
 
 drop policy if exists "Public reads active products" on public.products;
 create policy "Public reads active products" on public.products
 for select to anon, authenticated
-using (state = 'Active' or public.is_store_admin());
+using (state = 'Active' or (select private.is_store_admin()));
 
 drop policy if exists "Admins manage products" on public.products;
 create policy "Admins manage products" on public.products
 for all to authenticated
-using (public.is_store_admin())
-with check (public.is_store_admin());
+using ((select private.is_store_admin()))
+with check ((select private.is_store_admin()));
 
 drop policy if exists "Public reads store settings" on public.store_settings;
 create policy "Public reads store settings" on public.store_settings
@@ -203,13 +206,13 @@ for select to anon, authenticated using (true);
 drop policy if exists "Admins update store settings" on public.store_settings;
 create policy "Admins update store settings" on public.store_settings
 for update to authenticated
-using (public.is_store_admin())
-with check (public.is_store_admin());
+using ((select private.is_store_admin()))
+with check ((select private.is_store_admin()));
 
 drop policy if exists "Customers read their orders" on public.orders;
 create policy "Customers read their orders" on public.orders
 for select to authenticated
-using (profile_id = (select auth.uid()) or public.is_store_admin());
+using (profile_id = (select auth.uid()) or (select private.is_store_admin()));
 
 drop policy if exists "Customers read their order items" on public.order_items;
 create policy "Customers read their order items" on public.order_items
@@ -218,7 +221,7 @@ using (
   exists (
     select 1 from public.orders o
     where o.id = order_id
-      and (o.profile_id = (select auth.uid()) or public.is_store_admin())
+      and (o.profile_id = (select auth.uid()) or (select private.is_store_admin()))
   )
 );
 
@@ -444,7 +447,7 @@ declare
   v_order public.orders;
   v_item record;
 begin
-  if not public.is_store_admin() then
+  if not private.is_store_admin() then
     raise exception 'ADMIN_REQUIRED' using errcode = '42501';
   end if;
   if p_status not in ('Pending', 'Confirmed', 'Packed', 'Shipped', 'Delivered', 'Cancelled') then
@@ -491,7 +494,9 @@ revoke all on function public.update_customer_profile(text, text) from public;
 revoke all on function public.place_cod_order(jsonb, jsonb) from public;
 revoke all on function public.get_guest_order(text, text) from public;
 revoke all on function public.set_order_status(uuid, text) from public;
-grant execute on function public.is_store_admin() to anon, authenticated;
+revoke all on function private.is_store_admin() from public, anon, authenticated;
+grant usage on schema private to anon, authenticated;
+grant execute on function private.is_store_admin() to anon, authenticated;
 grant execute on function public.update_customer_profile(text, text) to authenticated;
 grant execute on function public.place_cod_order(jsonb, jsonb) to anon, authenticated;
 grant execute on function public.get_guest_order(text, text) to anon, authenticated;
@@ -528,5 +533,14 @@ for select to anon, authenticated using (bucket_id = 'product-images');
 drop policy if exists "Admins manage product images" on storage.objects;
 create policy "Admins manage product images" on storage.objects
 for all to authenticated
-using (bucket_id = 'product-images' and public.is_store_admin())
-with check (bucket_id = 'product-images' and public.is_store_admin());
+using (bucket_id = 'product-images' and (select private.is_store_admin()))
+with check (bucket_id = 'product-images' and (select private.is_store_admin()));
+
+do $$
+begin
+  if to_regprocedure('public.is_store_admin()') is not null then
+    execute 'revoke all on function public.is_store_admin() from public, anon, authenticated';
+    execute 'drop function public.is_store_admin()';
+  end if;
+end;
+$$;
