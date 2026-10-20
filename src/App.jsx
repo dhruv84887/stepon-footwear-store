@@ -614,13 +614,18 @@ export default function App() {
     wishlistOwnerRef.current = null;
     const hydrateWishlist = async () => {
       try {
-        const remote = await storeApi.listWishlist();
+        const [remote, availableProducts] = await Promise.all([
+          storeApi.listWishlist(),
+          storeApi.listProducts(),
+        ]);
         if (!active) return;
         const accountCache = readClientState(`stepon-wishlist:${profileId}`, []);
         const guestCache = readClientState('stepon-wishlist-guest', []);
         // Only merge this account's server/cache state and the explicit guest list.
         // wishlistRef may still contain the previous account during an account switch.
-        const merged = [...new Set([...remote, ...accountCache, ...guestCache])];
+        const availableIds = new Set((availableProducts || []).map((product) => product.id));
+        const merged = [...new Set([...remote, ...accountCache, ...guestCache])]
+          .filter((id) => availableIds.has(id));
         await storeApi.addWishlistItems(profileId, merged.filter((id) => !remote.includes(id)));
         if (!active) return;
         try {
