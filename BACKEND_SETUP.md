@@ -35,8 +35,9 @@ The connected project has these migrations applied. For a new project, apply the
 4. `supabase/migrations/20261020000400_validate_product_sizes.sql`
 5. `supabase/migrations/20261020000500_account_wishlists.sql`
 6. `supabase/migrations/20261020114216_wishlist_product_index.sql`
+7. `supabase/migrations/20261020115443_secure_rpc_execution.sql`
 
-They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally. The fourth migration prevents products with invalid or missing size options from being saved. The fifth migration stores signed-in customers' wishlists under their own profile with row-level security. The sixth migration indexes wishlist product references for efficient foreign-key checks and cascades.
+They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally. The fourth migration prevents products with invalid or missing size options from being saved. The fifth migration stores signed-in customers' wishlists under their own profile with row-level security. The sixth migration indexes wishlist product references for efficient foreign-key checks and cascades. The seventh moves privileged RPC implementations into the non-exposed `private` schema, keeps REST entry points as invoker functions, and applies own-row RLS and column-level grants to profile edits.
 
 ## Enable the store owner's admin account
 
