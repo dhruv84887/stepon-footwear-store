@@ -1,0 +1,93 @@
+/* Restrained frosted surfaces: blur stays on small, floating UI layers. */
+:root {
+  --glass-border-light: rgba(255,255,255,.72);
+  --glass-shadow-light: 0 12px 32px rgba(32,38,29,.08), inset 0 1px 0 rgba(255,255,255,.66);
+  --glass-border-dark: rgba(255,255,255,.16);
+}
+
+:root:not([data-theme='dark']) .announcement {
+  background: rgba(236,238,233,.86);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+:root:not([data-theme='dark']) .site-header {
+  background: rgba(248,249,246,.76);
+  border-bottom-color: rgba(255,255,255,.72);
+  box-shadow: 0 8px 26px rgba(28,34,25,.055);
+  backdrop-filter: blur(22px) saturate(155%);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+}
+:root[data-theme='dark'] .site-header {
+  background: rgba(14,17,14,.72);
+  border-bottom-color: rgba(255,255,255,.12);
+  box-shadow: 0 8px 26px rgba(0,0,0,.13);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+:root:not([data-theme='dark']) .theme-toggle {
+  border: 1px solid rgba(255,255,255,.82);
+  background: linear-gradient(145deg,rgba(255,255,255,.84),rgba(237,239,233,.62));
+  box-shadow: 0 4px 12px rgba(35,40,30,.07), inset 0 1px 0 white;
+}
+:root[data-theme='dark'] .theme-toggle {
+  border: 1px solid rgba(255,255,255,.18);
+  background: linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.035));
+  box-shadow: 0 5px 15px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.09);
+}
+.hero-rail {
+  border-color: rgba(255,255,255,.3);
+  background: linear-gradient(145deg,rgba(23,29,35,.66),rgba(10,14,19,.48));
+  box-shadow: 0 18px 46px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.13);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+.benefit-strip {
+  background: linear-gradient(115deg,rgba(11,15,21,.86),rgba(20,25,31,.74));
+  border: 1px solid rgba(255,255,255,.24);
+  box-shadow: 0 19px 52px rgba(9,14,20,.24), inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter: blur(24px) saturate(155%);
+  -webkit-backdrop-filter: blur(24px) saturate(155%);
+}
+.category-index,.category-arrow,.product-badge,.heart-button,.quick-add {
+  border: 1px solid rgba(255,255,255,.35);
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
+}
+.heart-button { box-shadow: 0 5px 15px rgba(20,24,18,.1), inset 0 1px 0 rgba(255,255,255,.6); }
+.quick-add { box-shadow: 0 8px 22px rgba(12,15,12,.14), inset 0 1px 0 rgba(255,255,255,.12); }
+.review-card {
+  background: rgba(255,255,255,.52);
+  border: 1px solid rgba(255,255,255,.76);
+  box-shadow: 0 13px 34px rgba(27,33,24,.07), inset 0 1px 0 rgba(255,255,255,.7);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+:root[data-theme='dark'] .benefit-strip {
+  background: linear-gradient(115deg,rgba(9,13,19,.84),rgba(20,25,32,.76));
+  border-color: rgba(255,255,255,.19);
+  box-shadow: 0 19px 52px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.1);
+}
+:root[data-theme='dark'] .review-card {
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 13px 34px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.06);
+}
+:root[data-theme='dark'] .category-index,:root[data-theme='dark'] .category-arrow,:root[data-theme='dark'] .product-badge,:root[data-theme='dark'] .heart-button,:root[data-theme='dark'] .quick-add {
+  border-color: rgba(255,255,255,.24);
+}
+:root:not([data-theme='dark']) .admin-topbar {
+  background: rgba(248,249,247,.78);
+  border-bottom-color: rgba(255,255,255,.75);
+  box-shadow: 0 6px 22px rgba(29,34,26,.045);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+:root[data-theme='dark'] .admin-topbar {
+  background: rgba(18,22,17,.78);
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .site-header,.admin-topbar,.announcement,.hero-rail,.benefit-strip,.category-index,.category-arrow,.product-badge,.heart-button,.quick-add,.review-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}

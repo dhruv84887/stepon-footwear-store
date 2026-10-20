@@ -1,0 +1,112 @@
+/* Keep supporting copy comfortable to read while preserving the display type. */
+.app-shell .announcement { font-size: 11px; }
+.app-shell .eyebrow { font-size: 10px; }
+.app-shell .site-header .nav-link { font-size: 13px; }
+.app-shell .brand-name small,
+.app-shell .site-footer .brand-name small { font-size: 9px; }
+.app-shell .button,
+.app-shell .text-link,
+.app-shell .shop-tab,
+.app-shell .filter-trigger,
+.app-shell .sort-select span,
+.app-shell .sort-select select,
+.app-shell .filter-option,
+.app-shell .clear-filters { font-size: 12px; }
+.app-shell .product-name { font-size: 15px; }
+.app-shell .product-meta,
+.app-shell .product-rating { font-size: 11px; }
+.app-shell .product-price { font-size: 15px; }
+.app-shell .product-badge { font-size: 10px; }
+.app-shell .auth-form label,
+.app-shell .checkout-fields label,
+.app-shell .account-profile-form label { font-size: 12px; }
+.app-shell .auth-form input,
+.app-shell .checkout-fields input,
+.app-shell .account-profile-form input { font-size: 14px; }
+.app-shell .auth-privacy,
+.app-shell .product-size-help,
+.app-shell .product-detail-perks b,
+.app-shell .delivery-check-form > small,
+.app-shell .quick-delivery,
+.app-shell .cart-secure,
+.app-shell .cart-item-info > span,
+.app-shell .cart-item-right > button,
+.app-shell .checkout-total > span small,
+.app-shell .checkout-success-items,
+.app-shell .checkout-back-link,
+.app-shell .account-summary-grid button span,
+.app-shell .account-order-info > div span,
+.app-shell .account-order-info p,
+.app-shell .account-order-status,
+.app-shell .account-address-card small,
+.app-shell .order-tracking-steps > div > b,
+.app-shell .order-tracking-summary > span { font-size: 11px; }
+.app-shell .footer-link-col a,
+.app-shell .footer-link-col button,
+.app-shell .footer-brand-col > p,
+.app-shell .footer-last p,
+.app-shell .footer-bottom { font-size: 12px; }
+
+.admin-shell .admin-login-form label,
+.admin-shell .admin-field { font-size: 12px; }
+.admin-shell .admin-login-form input,
+.admin-shell .admin-field input,
+.admin-shell .admin-field select,
+.admin-shell .admin-field textarea { font-size: 13px; }
+.admin-shell .admin-side-label,
+.admin-shell .admin-login-form .eyebrow,
+.admin-shell .admin-page-intro .eyebrow,
+.admin-shell .admin-panel-head .eyebrow,
+.admin-shell .admin-customer-table-head .eyebrow { font-size: 9px; }
+.admin-shell .admin-side-nav button,
+.admin-shell .admin-list-tabs button,
+.admin-shell .admin-inline-link,
+.admin-shell .admin-soft-button,
+.admin-shell .admin-primary-button,
+.admin-shell .admin-quiet-button,
+.admin-shell .admin-product-actions button,
+.admin-shell .admin-status-select { font-size: 11px; }
+.admin-shell .admin-sidebar-shop b,
+.admin-shell .admin-sidebar-shop small,
+.admin-shell .admin-product-cell b,
+.admin-shell .admin-customer-cell b,
+.admin-shell .admin-popular-info b,
+.admin-shell .admin-table tbody td,
+.admin-shell .admin-table-search input,
+.admin-shell .admin-period-select select,
+.admin-shell .admin-stat-top,
+.admin-shell .admin-page-intro p { font-size: 11px; }
+.admin-shell .admin-product-cell small,
+.admin-shell .admin-customer-cell small,
+.admin-shell .admin-table-date,
+.admin-shell .admin-sku,
+.admin-shell .admin-inventory,
+.admin-shell .admin-pill,
+.admin-shell .admin-popular-info small,
+.admin-shell .admin-chart-legend,
+.admin-shell .admin-chart-ylabels,
+.admin-shell .admin-chart-column > span,
+.admin-shell .admin-main-footer { font-size: 10px; }
+
+@media (max-width: 600px) {
+  .app-shell .announcement { font-size: 9px; }
+  .app-shell .site-header .nav-link { font-size: 13px; }
+  .app-shell .eyebrow { font-size: 9px; }
+  .app-shell .product-name { font-size: 14px; }
+  .app-shell .product-meta,
+  .app-shell .product-rating { font-size: 10px; }
+  .app-shell .product-price { font-size: 13px; }
+  .app-shell .shop-tab,
+  .app-shell .filter-option,
+  .app-shell .sort-select select,
+  .app-shell .filter-trigger { font-size: 11px; }
+  .app-shell .footer-link-col a,
+  .app-shell .footer-link-col button,
+  .app-shell .footer-brand-col > p,
+  .app-shell .footer-bottom { font-size: 11px; }
+  .admin-shell .admin-side-nav button,
+  .admin-shell .admin-login-form label,
+  .admin-shell .admin-field,
+  .admin-shell .admin-list-tabs button,
+  .admin-shell .admin-table tbody td { font-size: 11px; }
+}
