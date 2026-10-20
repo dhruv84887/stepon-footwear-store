@@ -194,10 +194,19 @@ for select to anon, authenticated
 using (state = 'Active' or (select private.is_store_admin()));
 
 drop policy if exists "Admins manage products" on public.products;
-create policy "Admins manage products" on public.products
-for all to authenticated
+drop policy if exists "Admins insert products" on public.products;
+create policy "Admins insert products" on public.products
+for insert to authenticated
+with check ((select private.is_store_admin()));
+drop policy if exists "Admins update products" on public.products;
+create policy "Admins update products" on public.products
+for update to authenticated
 using ((select private.is_store_admin()))
 with check ((select private.is_store_admin()));
+drop policy if exists "Admins delete products" on public.products;
+create policy "Admins delete products" on public.products
+for delete to authenticated
+using ((select private.is_store_admin()));
 
 drop policy if exists "Public reads store settings" on public.store_settings;
 create policy "Public reads store settings" on public.store_settings
@@ -489,11 +498,11 @@ begin
 end;
 $$;
 
-revoke all on function public.handle_new_user() from public;
-revoke all on function public.update_customer_profile(text, text) from public;
-revoke all on function public.place_cod_order(jsonb, jsonb) from public;
-revoke all on function public.get_guest_order(text, text) from public;
-revoke all on function public.set_order_status(uuid, text) from public;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+revoke all on function public.update_customer_profile(text, text) from public, anon, authenticated;
+revoke all on function public.place_cod_order(jsonb, jsonb) from public, anon, authenticated;
+revoke all on function public.get_guest_order(text, text) from public, anon, authenticated;
+revoke all on function public.set_order_status(uuid, text) from public, anon, authenticated;
 revoke all on function private.is_store_admin() from public, anon, authenticated;
 grant usage on schema private to anon, authenticated;
 grant execute on function private.is_store_admin() to anon, authenticated;
@@ -531,10 +540,19 @@ create policy "Public can view product images" on storage.objects
 for select to anon, authenticated using (bucket_id = 'product-images');
 
 drop policy if exists "Admins manage product images" on storage.objects;
-create policy "Admins manage product images" on storage.objects
-for all to authenticated
+drop policy if exists "Admins insert product images" on storage.objects;
+create policy "Admins insert product images" on storage.objects
+for insert to authenticated
+with check (bucket_id = 'product-images' and (select private.is_store_admin()));
+drop policy if exists "Admins update product images" on storage.objects;
+create policy "Admins update product images" on storage.objects
+for update to authenticated
 using (bucket_id = 'product-images' and (select private.is_store_admin()))
 with check (bucket_id = 'product-images' and (select private.is_store_admin()));
+drop policy if exists "Admins delete product images" on storage.objects;
+create policy "Admins delete product images" on storage.objects
+for delete to authenticated
+using (bucket_id = 'product-images' and (select private.is_store_admin()));
 
 do $$
 begin

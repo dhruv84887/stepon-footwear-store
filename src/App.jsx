@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import AdminPanel from './AdminPanel.jsx';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { storeApi } from './lib/storeApi.js';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, Check, ChevronDown,
@@ -7,6 +6,8 @@ import {
   Grid2X2, House, Moon, ShieldCheck, ShoppingBag, SlidersHorizontal, Sparkles, Star, Sun, Truck, UserRound,
   X, MapPin, PackageCheck, Ruler, RotateCcw, LogOut, User, Clock3,
 } from 'lucide-react';
+
+const AdminPanel = lazy(() => import('./AdminPanel.jsx'));
 
 const image = (id, width = 900) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`;
 
@@ -625,7 +626,7 @@ export default function App() {
   if (passwordRecovery) return <PasswordRecovery onComplete={completePasswordReset} />;
   if (storeApi.configured && !backendReady) return <div className="store-connect-state"><span className="auth-mark">s<span>.</span></span><p>Getting the STEPON store ready…</p></div>;
   if (storeApi.configured && backendError && !catalog.length) return <div className="store-connect-state"><span className="auth-mark">s<span>.</span></span><h1>One moment.</h1><p>The store database could not be reached: {backendError}</p><button className="button button--dark" onClick={refreshBackend}>Try again <ArrowRight size={15} /></button></div>;
-  if (page === 'admin') return <AdminPanel onBack={() => showPage('home')} theme={theme} onToggleTheme={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} configured={storeApi.configured} storeName={storeName} adminUser={customer?.role === 'admin' ? customer : null} onAdminSignIn={handleAdminSignIn} onAdminSignOut={handleLogout} onResetPassword={storeApi.sendPasswordReset} />;
+  if (page === 'admin') return <Suspense fallback={<div className="store-connect-state"><span className="auth-mark">s<span>.</span></span><p>Opening the STEPON workspace…</p></div>}><AdminPanel onBack={() => showPage('home')} theme={theme} onToggleTheme={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} configured={storeApi.configured} storeName={storeName} adminUser={customer?.role === 'admin' ? customer : null} onAdminSignIn={handleAdminSignIn} onAdminSignOut={handleLogout} onResetPassword={storeApi.sendPasswordReset} /></Suspense>;
 
   return <div className="app-shell"><Header page={page} setPage={showPage} cartCount={cartCount} wishlistCount={wishlist.length} openCart={() => setDrawer(true)} openSearch={() => setSearchOpen(true)} onCategory={goCategory} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu} theme={theme} onToggleTheme={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} customer={customer} deliverySettings={deliverySettings} storeName={storeName} />
     {page === 'home' && <Home products={catalog} onCategory={goCategory} wishlist={wishlist} onWishlist={toggleWishlist} onQuickView={setQuickProduct} onProduct={openProduct} setPage={showPage} storeEmail={storeEmail} storeName={storeName} configured={storeApi.configured} deliverySettings={deliverySettings} />}
