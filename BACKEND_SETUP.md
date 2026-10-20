@@ -19,13 +19,15 @@ In **Supabase → Authentication → URL Configuration**:
 - Add local development redirects such as `http://localhost:5173/**` and `http://127.0.0.1:5173/**` to the redirect allow list.
 - Add the deployed website origin and any needed paths to that allow list before production sign-up or password recovery.
 
+The local redirect allow list still needs to be confirmed in the Supabase dashboard. Signup links are sent only after confirmation is enabled there; successful registration also requires a working email-delivery provider.
+
 Configure a custom SMTP provider before sending confirmation and recovery emails to real customers. Supabase's built-in email service is for limited testing and is not intended for production delivery. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
 
 Google sign-in is optional and disabled for this project. Its button stays hidden unless Google OAuth is configured in Supabase and `VITE_SUPABASE_GOOGLE_AUTH_ENABLED=true` is set. Add the Supabase OAuth callback URL to the Google OAuth client as well.
 
 ## Database migrations
 
-The connected project already has both migrations applied. For a new project, apply these SQL files in order:
+The connected project already has all three migrations applied. For a new project, apply these SQL files in order:
 
 1. `supabase/migrations/20261020000100_store_backend.sql`
 2. `supabase/migrations/20261020000200_tighten_api_grants.sql`
