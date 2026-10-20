@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { storeApi } from './lib/storeApi.js';
 import {
   ArrowDown, ArrowLeft, ArrowRight, ArrowUpRight, Camera, Check, ChevronDown,
@@ -418,7 +418,12 @@ export default function App() {
   const storeEmail = deliverySettings?.storeEmail || 'hello@stepon.store';
   const storeName = deliverySettings?.storeName || 'STEPON Footwear';
   const [category, setCategory] = useState('All');
-  const [wishlist, setWishlist] = useState(() => readClientState('stepon-wishlist', []));
+  const [wishlist, setWishlist] = useState(() => readClientState(storeApi.configured ? 'stepon-wishlist-guest' : 'stepon-wishlist', []));
+  const [wishlistError, setWishlistError] = useState('');
+  const wishlistRef = useRef(wishlist);
+  wishlistRef.current = wishlist;
+  const wishlistOwnerRef = useRef(null);
+  const wishlistQueueRef = useRef(Promise.resolve());
   const [cart, setCart] = useState(() => readClientState('stepon-cart', []));
   const [orders, setOrders] = useState(() => storeApi.configured ? [] : readClientState('stepon-customer-orders', []));
   const [customer, setCustomer] = useState(() => storeApi.configured ? null : readClientState('stepon-customer', null));
@@ -440,7 +445,24 @@ export default function App() {
   };
 
   const goCategory = (next) => { setCategory(next); setPage('shop'); setMobileMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  const toggleWishlist = (id) => setWishlist((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const toggleWishlist = (id) => {
+    const current = wishlistRef.current;
+    const saved = !current.includes(id);
+    const next = saved ? [...current, id] : current.filter((item) => item !== id);
+    wishlistRef.current = next;
+    setWishlist(next);
+    const profileId = customer?.id;
+    const cacheKey = storeApi.configured && profileId && wishlistOwnerRef.current === profileId
+      ? `stepon-wishlist:${profileId}`
+      : storeApi.configured ? 'stepon-wishlist-guest' : 'stepon-wishlist';
+    try { localStorage.setItem(cacheKey, JSON.stringify(next)); } catch { /* Saved pairs remain available for this visit. */ }
+    if (storeApi.configured && profileId && wishlistOwnerRef.current === profileId) {
+      wishlistQueueRef.current = wishlistQueueRef.current
+        .catch(() => {})
+        .then(() => storeApi.setWishlistItem(profileId, id, saved))
+        .catch(() => setWishlistError('Saved pairs are still on this device, but could not sync to your account.'));
+    }
+  };
   const openProduct = (product) => { setSelectedProduct(product); setPage('product'); setQuickProduct(null); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   const addToCart = (product, size = product.sizes[Math.floor(product.sizes.length / 2)]) => {
     const available = Number(product.stock ?? 24);
@@ -577,6 +599,48 @@ export default function App() {
     const unsubscribe = storeApi.onAuthChange((session, event) => { window.setTimeout(() => hydrate(session, event), 0); });
     return () => { active = false; unsubscribe(); };
   }, []);
+  useEffect(() => {
+    if (!storeApi.configured) return undefined;
+    const profileId = customer?.id;
+    if (!profileId) {
+      wishlistOwnerRef.current = null;
+      const guestWishlist = readClientState('stepon-wishlist-guest', []);
+      wishlistRef.current = guestWishlist;
+      setWishlist(guestWishlist);
+      return undefined;
+    }
+
+    let active = true;
+    wishlistOwnerRef.current = null;
+    const hydrateWishlist = async () => {
+      try {
+        const remote = await storeApi.listWishlist();
+        if (!active) return;
+        const accountCache = readClientState(`stepon-wishlist:${profileId}`, []);
+        const guestCache = readClientState('stepon-wishlist-guest', []);
+        // Only merge this account's server/cache state and the explicit guest list.
+        // wishlistRef may still contain the previous account during an account switch.
+        const merged = [...new Set([...remote, ...accountCache, ...guestCache])];
+        await storeApi.addWishlistItems(profileId, merged.filter((id) => !remote.includes(id)));
+        if (!active) return;
+        try {
+          localStorage.setItem(`stepon-wishlist:${profileId}`, JSON.stringify(merged));
+          localStorage.removeItem('stepon-wishlist-guest');
+        } catch { /* Supabase remains the saved-pairs source for signed-in customers. */ }
+        wishlistOwnerRef.current = profileId;
+        wishlistRef.current = merged;
+        setWishlist(merged);
+        setWishlistError('');
+      } catch {
+        if (active) setWishlistError('Could not sync saved pairs. They remain available on this device.');
+      }
+    };
+    hydrateWishlist();
+    return () => {
+      active = false;
+      if (wishlistOwnerRef.current === profileId) wishlistOwnerRef.current = null;
+    };
+  }, [customer?.id]);
 
   useEffect(() => { document.body.classList.toggle('no-scroll', drawer || searchOpen || !!quickProduct || checkoutOpen); return () => document.body.classList.remove('no-scroll'); }, [drawer, searchOpen, quickProduct, checkoutOpen]);
   useEffect(() => { const key = (e) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setSearchOpen(true); } }; window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key); }, []);
@@ -586,7 +650,6 @@ export default function App() {
     try { localStorage.setItem('stepon-theme', theme); } catch { /* Theme still works for this visit. */ }
   }, [theme]);
   useEffect(() => { const displayName = String(storeName).replace(/\s+Footwear$/i, '').trim() || 'STEPON'; document.title = `${displayName} · Good shoes, good days`; }, [storeName]);
-  useEffect(() => { try { localStorage.setItem('stepon-wishlist', JSON.stringify(wishlist)); } catch { /* Wishlist still works during this visit. */ } }, [wishlist]);
   useEffect(() => { try { localStorage.setItem('stepon-cart', JSON.stringify(cart)); } catch { /* Bag still works during this visit. */ } }, [cart]);
   useEffect(() => { if (storeApi.configured) return; try { localStorage.setItem('stepon-customer-orders', JSON.stringify(orders)); } catch { /* Orders still work during this visit. */ } }, [orders]);
   useEffect(() => { if (storeApi.configured) return; try { if (customer) localStorage.setItem('stepon-customer', JSON.stringify(customer)); else localStorage.removeItem('stepon-customer'); } catch { /* Account still works during this visit. */ } }, [customer]);
@@ -632,6 +695,7 @@ export default function App() {
   if (page === 'admin') return <Suspense fallback={<div className="store-connect-state"><span className="auth-mark">s<span>.</span></span><p>Opening the STEPON workspace…</p></div>}><AdminPanel onBack={() => showPage('home')} theme={theme} onToggleTheme={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} configured={storeApi.configured} storeName={storeName} adminUser={customer?.role === 'admin' ? customer : null} onAdminSignIn={handleAdminSignIn} onAdminSignOut={handleLogout} onResetPassword={storeApi.sendPasswordReset} /></Suspense>;
 
   return <div className="app-shell"><Header page={page} setPage={showPage} cartCount={cartCount} wishlistCount={wishlist.length} openCart={() => setDrawer(true)} openSearch={() => setSearchOpen(true)} onCategory={goCategory} mobileMenu={mobileMenu} setMobileMenu={setMobileMenu} theme={theme} onToggleTheme={() => setTheme((current) => current === 'light' ? 'dark' : 'light')} customer={customer} deliverySettings={deliverySettings} storeName={storeName} />
+    {wishlistError && <div className="wishlist-sync-notice" role="status">{wishlistError}<button onClick={() => setWishlistError('')}>Dismiss</button></div>}
     {page === 'home' && <Home products={catalog} onCategory={goCategory} wishlist={wishlist} onWishlist={toggleWishlist} onQuickView={setQuickProduct} onProduct={openProduct} setPage={showPage} storeEmail={storeEmail} storeName={storeName} configured={storeApi.configured} deliverySettings={deliverySettings} />}
     {page === 'shop' && <Shop products={catalog} category={category} setCategory={setCategory} wishlist={wishlist} onWishlist={toggleWishlist} onQuickView={setQuickProduct} onProduct={openProduct} onSearch={() => setSearchOpen(true)} setPage={showPage} storeEmail={storeEmail} storeName={storeName} />}
     {page === 'product' && selectedProduct && <ProductDetails key={selectedProduct.id} products={catalog} product={catalog.find((item) => item.id === selectedProduct.id) || selectedProduct} wishlist={wishlist} onWishlist={toggleWishlist} onProduct={openProduct} onQuickView={setQuickProduct} onAdd={addToCart} onBuyNow={buyNow} onBack={() => showPage('shop')} configured={storeApi.configured} deliverySettings={deliverySettings} />}

@@ -11,7 +11,7 @@ npm run dev
 
 ## Supabase status
 
-This checkout is connected to the STEPON Supabase project. Its local `.env.local` contains the project URL and publishable key, and all four database migrations plus the starter catalog are installed. `.env.local` is ignored by Git. For another checkout or project, follow [BACKEND_SETUP.md](BACKEND_SETUP.md).
+This checkout is connected to the STEPON Supabase project. Its local `.env.local` contains the project URL and publishable key, and the database migrations plus starter catalog are installed. `.env.local` is ignored by Git. For another checkout or project, follow [BACKEND_SETUP.md](BACKEND_SETUP.md).
 
 Email confirmation is enabled. Before signing up locally, add `http://localhost:5173/**` and `http://127.0.0.1:5173/**` under Supabase **Authentication → URL Configuration**. The store supports COD orders; the owner account needs to be promoted to admin after registration. Never put a Supabase service-role or secret key in the browser app.
 

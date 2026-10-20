@@ -209,6 +209,29 @@ export const storeApi = {
     return data;
   },
 
+  async listWishlist() {
+    if (!supabase) return [];
+    const { data, error } = await supabase.from('wishlist_items').select('product_id').order('created_at', { ascending: true });
+    if (error) throw error;
+    return (data || []).map((row) => row.product_id);
+  },
+
+  async addWishlistItems(profileId, productIds) {
+    if (!supabase || !productIds.length) return;
+    const rows = productIds.map((productId) => ({ profile_id: profileId, product_id: productId }));
+    const { error } = await supabase.from('wishlist_items').upsert(rows, { onConflict: 'profile_id,product_id', ignoreDuplicates: true });
+    if (error) throw error;
+  },
+
+  async setWishlistItem(profileId, productId, saved) {
+    if (!supabase) return;
+    const request = saved
+      ? supabase.from('wishlist_items').upsert({ profile_id: profileId, product_id: productId }, { onConflict: 'profile_id,product_id', ignoreDuplicates: true })
+      : supabase.from('wishlist_items').delete().eq('profile_id', profileId).eq('product_id', productId);
+    const { error } = await request;
+    if (error) throw error;
+  },
+
   async listProducts() {
     if (!supabase) return null;
     const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
