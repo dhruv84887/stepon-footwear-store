@@ -1,15 +1,41 @@
 # STEPON backend setup
 
-STEPON uses Supabase Auth, Postgres, and Storage for customer accounts, the catalog, product photos, store settings, and COD orders. In the browser, use only the project URL and its publishable/anon key. Never put a service-role or secret key in a `VITE_` variable.
+STEPON uses Supabase Auth, Postgres, and Storage for customer accounts, the product catalog, product photos, store settings, and COD orders. The connected `STEPON Footwear` project is in Mumbai (`ap-south-1`). The current workspace already has its project URL and publishable key in `.env.local`; that file is ignored by Git.
 
-## Connect the Supabase project
+## Local development
 
-1. Copy `.env.example` to `.env.local`.
-2. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. A legacy anon key also works in that setting. `.env.local` is ignored by Git.
-3. Restart the Vite server after changing environment variables.
-4. In the Supabase SQL Editor, run `supabase/migrations/20261020000100_store_backend.sql`.
-5. In Supabase Authentication settings, add the local website origin to the allowed redirect URLs. For local development, this is the origin shown in the browser address bar, such as `http://127.0.0.1:5173`.
-6. Create the store owner's account from the STEPON sign-in page. Then promote that user's profile in the SQL Editor, replacing the example email:
+1. Install dependencies with `npm install`.
+2. If setting up another checkout, copy `.env.example` to `.env.local` and enter `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+3. Restart Vite after changing environment variables. Never put a Supabase secret or service-role key in a `VITE_` variable or commit it.
+4. Run `npm run dev` and open the local URL printed by Vite.
+
+## Authentication setup
+
+Email/password authentication is enabled, and email confirmation is currently required. Registration and password-reset links redirect to the website's current origin.
+
+In **Supabase → Authentication → URL Configuration**:
+
+- Set **Site URL** to the deployed website origin when one exists.
+- Add local development redirects such as `http://localhost:5173/**` and `http://127.0.0.1:5173/**` to the redirect allow list.
+- Add the deployed website origin and any needed paths to that allow list before production sign-up or password recovery.
+
+Configure a custom SMTP provider before sending confirmation and recovery emails to real customers. Supabase's built-in email service is for limited testing and is not intended for production delivery. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
+
+Google sign-in is optional and disabled for this project. Its button stays hidden unless Google OAuth is configured in Supabase and `VITE_SUPABASE_GOOGLE_AUTH_ENABLED=true` is set. Add the Supabase OAuth callback URL to the Google OAuth client as well.
+
+## Database migrations
+
+The connected project already has both migrations applied. For a new project, apply these SQL files in order:
+
+1. `supabase/migrations/20261020000100_store_backend.sql`
+2. `supabase/migrations/20261020000200_tighten_api_grants.sql`
+
+They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally.
+
+## Enable the store owner's admin account
+
+1. Register on the STEPON site with the owner's email and confirm that email.
+2. Run this in the Supabase SQL Editor, replacing the email with the exact address used to register:
 
    ```sql
    update public.profiles
@@ -17,16 +43,8 @@ STEPON uses Supabase Auth, Postgres, and Storage for customer accounts, the cata
    where id = (select id from auth.users where email = 'OWNER_EMAIL_HERE');
    ```
 
-7. Sign in to **Store admin** with that email and password. Admin access is checked against the profile role; a regular customer account cannot open the dashboard.
+3. Sign in to **Store admin** with that account. Admin routes and order-status changes verify the profile role on the server.
 
-The migration creates the database tables and row-level security rules, seeds the eight starter products, creates the public `product-images` bucket, and installs transactional COD checkout and admin order-status functions. Checkout calculates delivery and price on the server and locks product rows before reserving stock.
+## Payment method
 
-Google sign-in is optional. To enable the Google button, configure Google as an OAuth provider in Supabase and add its callback URL to the Google OAuth client. Otherwise, email/password accounts work normally.
-
-## Local preview without credentials
-
-When `.env.local` is not configured, the storefront remains in local preview mode. Its demo account, catalog, cart, settings, and orders are stored in this browser only; this is not real authentication or store data.
-
-## Current payment method
-
-Checkout currently supports cash on delivery. Online payments need a payment provider account and a server-side verification flow before they can be enabled.
+Checkout currently supports cash on delivery. Online payments require a payment-provider account and server-side payment verification before they can be enabled.
