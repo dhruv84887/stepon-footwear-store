@@ -107,7 +107,7 @@ create index if not exists order_items_order_idx on public.order_items (order_id
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 begin
   new.updated_at = now();
@@ -132,7 +132,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 begin
   insert into public.profiles (id, email, full_name, phone, role)
@@ -166,7 +166,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
   select exists (
     select 1 from public.profiles
@@ -232,7 +232,7 @@ create or replace function public.update_customer_profile(p_full_name text, p_ph
 returns public.profiles
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   v_profile public.profiles;
@@ -260,7 +260,7 @@ create or replace function public.place_cod_order(p_customer jsonb, p_items json
 returns jsonb
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   v_customer_name text;
@@ -403,7 +403,7 @@ create or replace function public.get_guest_order(p_order_number text, p_token t
 returns jsonb
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   v_order public.orders;
@@ -438,7 +438,7 @@ create or replace function public.set_order_status(p_order_id uuid, p_status tex
 returns public.orders
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = ''
 as $$
 declare
   v_order public.orders;
