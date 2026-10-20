@@ -29,6 +29,7 @@ The connected project already has both migrations applied. For a new project, ap
 
 1. `supabase/migrations/20261020000100_store_backend.sql`
 2. `supabase/migrations/20261020000200_tighten_api_grants.sql`
+3. `supabase/migrations/20261020000300_restrict_table_grants.sql`
 
 They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally.
 
