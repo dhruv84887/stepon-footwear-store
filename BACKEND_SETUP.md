@@ -2,6 +2,8 @@
 
 STEPON uses Supabase Auth, Postgres, and Storage for customer accounts, the product catalog, product photos, store settings, and COD orders. The connected `STEPON Footwear` project is in Mumbai (`ap-south-1`). The current workspace already has its project URL and publishable key in `.env.local`; that file is ignored by Git.
 
+The public storefront is deployed at <https://dhruv84887.github.io/stepon-footwear-store/>. Every push to `main` builds and deploys the site through GitHub Actions. The repository has the public frontend values `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` configured as Actions variables; never use a Supabase secret or service-role key in the frontend.
+
 ## Local development
 
 1. Install dependencies with `npm install`.
@@ -11,15 +13,15 @@ STEPON uses Supabase Auth, Postgres, and Storage for customer accounts, the prod
 
 ## Authentication setup
 
-Email/password authentication is enabled, and email confirmation is currently required. Registration and password-reset links redirect to the website's current origin.
+Email/password authentication is enabled, and email confirmation is currently required. Registration, OAuth, and password-reset links redirect to the app base path (`/` locally and `/stepon-footwear-store/` on GitHub Pages).
 
 In **Supabase → Authentication → URL Configuration**:
 
-- Set **Site URL** to the deployed website origin when one exists.
-- Add local development redirects such as `http://localhost:5173/**` and `http://127.0.0.1:5173/**` to the redirect allow list.
-- Add the deployed website origin and any needed paths to that allow list before production sign-up or password recovery.
+- Set **Site URL** to `https://dhruv84887.github.io/stepon-footwear-store/`.
+- Add `https://dhruv84887.github.io/stepon-footwear-store/**` to the redirect allow list.
+- Keep local development redirects `http://localhost:5173/**` and `http://127.0.0.1:5173/**` in the allow list.
 
-The local redirect allow list still needs to be confirmed in the Supabase dashboard. Signup links are sent only after confirmation is enabled there; successful registration also requires a working email-delivery provider.
+The production redirect URL still needs to be added in the Supabase dashboard. Signup links are sent only after confirmation is enabled there; successful registration also requires a working email-delivery provider.
 
 Configure a custom SMTP provider before sending confirmation and recovery emails to real customers. Supabase's built-in email service is for limited testing and is not intended for production delivery. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
 
