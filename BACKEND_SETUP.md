@@ -27,13 +27,14 @@ Google sign-in is optional and disabled for this project. Its button stays hidde
 
 ## Database migrations
 
-The connected project already has all three migrations applied. For a new project, apply these SQL files in order:
+The connected project already has all four migrations applied. For a new project, apply these SQL files in order:
 
 1. `supabase/migrations/20261020000100_store_backend.sql`
 2. `supabase/migrations/20261020000200_tighten_api_grants.sql`
 3. `supabase/migrations/20261020000300_restrict_table_grants.sql`
+4. `supabase/migrations/20261020000400_validate_product_sizes.sql`
 
-They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally.
+They create customer profiles, products, store settings, COD orders and order items; enable row-level security; seed eight starter products; create the public `product-images` bucket; and install checkout, guest order lookup, profile update, and admin order-status functions. The second migration restricts RPC grants and separates public reads from admin writes. Checkout validates prices and available sizes on the server, locks product rows, and decrements stock transactionally. The fourth migration prevents products with invalid or missing size options from being saved.
 
 ## Enable the store owner's admin account
 

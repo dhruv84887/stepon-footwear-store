@@ -86,26 +86,36 @@ const asOrder = (row) => {
   };
 };
 
-const productPayload = (product) => ({
-  sku: product.sku || product.adminId || (typeof product.id === 'string' && product.id.startsWith('ST-') ? product.id : `ST-${crypto.randomUUID().slice(0, 8).toUpperCase()}`),
-  name: product.name.trim(),
-  description: product.description || '',
-  category: product.category,
-  audience: product.audience || 'Unisex',
-  price: numeric(product.price),
-  compare_price: numeric(product.compare) > numeric(product.price) ? numeric(product.compare) : null,
-  sizes: (Array.isArray(product.sizes) ? product.sizes : String(product.sizes || '').split(',')).map((size) => Number(String(size).trim())).filter((size) => Number.isInteger(size) && size > 0),
-  stock: Math.max(0, Math.trunc(numeric(product.stock))),
-  color: product.color || 'Black',
-  color_hex: /^#[\da-f]{6}$/i.test(product.colorHex || '') ? product.colorHex : '#343832',
-  image_url: product.image || '/images/step-on-hero.webp',
-  state: product.state || 'Active',
-  badge: product.badge || '',
-  rating: numeric(product.rating),
-  review_count: numeric(product.reviews),
-  popularity: numeric(product.popularity, 50),
-  is_new: Boolean(product.isNew),
-});
+const productPayload = (product) => {
+  const enteredSizes = (Array.isArray(product.sizes) ? product.sizes : String(product.sizes || '').split(','))
+    .map((size) => String(size).trim())
+    .filter(Boolean)
+    .map(Number);
+  const sizes = [...new Set(enteredSizes)];
+  if (!sizes.length || sizes.length > 20 || sizes.some((size) => !Number.isInteger(size) || size < 1 || size > 20)) {
+    throw new Error('Add between 1 and 20 shoe sizes, using whole numbers from 1 to 20.');
+  }
+  return {
+    sku: product.sku || product.adminId || (typeof product.id === 'string' && product.id.startsWith('ST-') ? product.id : `ST-${crypto.randomUUID().slice(0, 8).toUpperCase()}`),
+    name: product.name.trim(),
+    description: product.description || '',
+    category: product.category,
+    audience: product.audience || 'Unisex',
+    price: numeric(product.price),
+    compare_price: numeric(product.compare) > numeric(product.price) ? numeric(product.compare) : null,
+    sizes,
+    stock: Math.max(0, Math.trunc(numeric(product.stock))),
+    color: product.color || 'Black',
+    color_hex: /^#[\da-f]{6}$/i.test(product.colorHex || '') ? product.colorHex : '#343832',
+    image_url: product.image || '/images/step-on-hero.webp',
+    state: product.state || 'Active',
+    badge: product.badge || '',
+    rating: numeric(product.rating),
+    review_count: numeric(product.reviews),
+    popularity: numeric(product.popularity, 50),
+    is_new: Boolean(product.isNew),
+  };
+};
 
 const result = ({ data, error }) => {
   if (error) throw error;

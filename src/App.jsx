@@ -331,7 +331,9 @@ function CustomerAccount({ customer, orders, wishlist, setPage, onLogout, onTrac
   const [savedNotice, setSavedNotice] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
-  const myOrders = orders.filter((order) => order.email === customer.email);
+  // Supabase RLS already limits configured accounts to their own orders; the
+  // checkout contact email can differ from the account email.
+  const myOrders = configured ? orders : orders.filter((order) => order.email === customer.email);
   const addresses = [...new Map(myOrders.map((order) => [order.address, order])).values()].filter((order) => order.address);
   const tabs = [{ id: 'overview', label: 'Overview', icon: User }, { id: 'orders', label: 'My orders', icon: PackageCheck }, { id: 'addresses', label: 'Addresses', icon: MapPin }, { id: 'profile', label: 'Profile', icon: UserRound }];
   return <main className="customer-account-page"><div className="customer-account-head"><div><span className="eyebrow">YOUR LITTLE STEPON CORNER</span><h1>Hello, <em>{customer.name?.split(' ')[0] || 'there'}.</em></h1><p>Your pairs, orders and details, all in one place.</p></div><button className="account-logout" onClick={onLogout}><LogOut size={15} /> Sign out</button></div>
