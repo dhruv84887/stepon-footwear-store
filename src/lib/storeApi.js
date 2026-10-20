@@ -1,5 +1,7 @@
 import { backendConfigured, supabase } from './supabase.js';
 
+const authRedirectUrl = () => `${window.location.origin}${import.meta.env.BASE_URL}`;
+
 const numeric = (value, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
 const asProduct = (row) => {
   const seededDemoReview = /^ST-00[1-8]$/.test(row.sku || '');
@@ -152,7 +154,7 @@ export const storeApi = {
       password,
       options: {
         data: { full_name: name.trim(), phone: phone.trim() },
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: authRedirectUrl(),
       },
     });
     if (error) throw error;
@@ -164,7 +166,7 @@ export const storeApi = {
     try { sessionStorage.setItem('stepon-auth-return', 'account'); } catch { /* OAuth can still complete without this navigation hint. */ }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin },
+      options: { redirectTo: authRedirectUrl() },
     });
     if (error) throw error;
     return data;
@@ -172,7 +174,7 @@ export const storeApi = {
 
   async sendPasswordReset(email) {
     if (!supabase) throw new Error('Supabase is not configured.');
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.origin });
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: authRedirectUrl() });
     if (error) throw error;
   },
 
