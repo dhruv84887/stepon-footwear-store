@@ -21,7 +21,7 @@ In **Supabase → Authentication → URL Configuration**:
 - Add `https://dhruv84887.github.io/stepon-footwear-store/**` to the redirect allow list.
 - Keep local development redirects `http://localhost:5173/**` and `http://127.0.0.1:5173/**` in the allow list.
 
-The production redirect URL still needs to be added in the Supabase dashboard. Signup links are sent only after confirmation is enabled there; successful registration also requires a working email-delivery provider.
+The production Site URL and all three redirect URLs above are configured in the connected Supabase project. Email confirmation is enabled. Successful registration requires a working email-delivery provider.
 
 Configure a custom SMTP provider before sending confirmation and recovery emails to real customers. Supabase's built-in email service is for limited testing and is not intended for production delivery. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
 
