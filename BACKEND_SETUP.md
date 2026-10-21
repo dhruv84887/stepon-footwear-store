@@ -23,7 +23,14 @@ In **Supabase → Authentication → URL Configuration**:
 
 The production Site URL and all three redirect URLs above are configured in the connected Supabase project. Email confirmation is enabled. Successful registration requires a working email-delivery provider.
 
-Configure a custom SMTP provider before sending confirmation and recovery emails to real customers. Supabase's built-in email service is for limited testing and is not intended for production delivery. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
+### Configure email delivery
+
+1. Create an account with an email provider that supports SMTP and verify the sender address or domain the provider requires.
+2. In **Supabase → Authentication → Emails → SMTP Settings**, turn on **Enable custom SMTP**.
+3. Enter the provider's SMTP host, port, username, and password, plus the sender email and sender name. Use the port and security settings recommended by that provider, then save.
+4. Reload the page and confirm the custom SMTP switch remains on. Test registration with a mailbox you control and confirm the email link returns to STEPON.
+
+Enter SMTP credentials only in the Supabase dashboard. Never put them in this repository, `.env.local`, a `VITE_` variable, or chat. Supabase's built-in sender is a temporary testing option: it only delivers to addresses on the project's organization team and is rate-limited, so it cannot serve public customer signups. It may be enough to confirm an owner account if that owner uses their organization-team email. See [Supabase custom SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
 
 Google sign-in is optional and disabled for this project. Its button stays hidden unless Google OAuth is configured in Supabase and `VITE_SUPABASE_GOOGLE_AUTH_ENABLED=true` is set. Add the Supabase OAuth callback URL to the Google OAuth client as well.
 
