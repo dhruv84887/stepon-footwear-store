@@ -127,8 +127,8 @@ function ProductCard({ product, saved, onWishlist, onQuickView, onProduct }) {
   </article>;
 }
 
-function ProductGrid({ items, wishlist, onWishlist, onQuickView, onProduct, emptyMessage = 'No pairs found. Try another filter.' }) {
-  if (!items.length) return <div className="empty-products"><span>Nothing here yet.</span><p>{emptyMessage}</p></div>;
+function ProductGrid({ items, wishlist, onWishlist, onQuickView, onProduct, emptyMessage = 'No pairs found. Try another filter.', emptyActionLabel, onEmptyAction }) {
+  if (!items.length) return <div className="empty-products"><span>Nothing here yet.</span><p>{emptyMessage}</p>{onEmptyAction && <button className="button button--dark" onClick={onEmptyAction}>{emptyActionLabel || 'Clear filters'} <ArrowRight size={15} /></button>}</div>;
   return <div className="product-grid">{items.map((product) => <ProductCard key={product.id} product={product} saved={wishlist.includes(product.id)} onWishlist={onWishlist} onQuickView={onQuickView} onProduct={onProduct} />)}</div>;
 }
 
@@ -213,6 +213,7 @@ function Shop({ products, category, setCategory, wishlist, onWishlist, onQuickVi
   const [colorFilter, setColorFilter] = useState('');
   const [audienceFilter, setAudienceFilter] = useState('');
   const categoriesList = ['All', 'Sneakers', 'Slides', 'Sandals', 'Boots'];
+  const clearFilters = () => { setCategory('All'); setSizeFilter(null); setPriceFilter('All prices'); setColorFilter(''); setAudienceFilter(''); };
   const colorKeywords = { Black: ['black'], Brown: ['brown', 'cognac', 'sienna'], White: ['white', 'chalk', 'cloud', 'stone'], Olive: ['olive', 'moss'], Rose: ['rose'] };
   let items = products.filter((p) => p.state !== 'Draft' && (category === 'All' || (category === 'New' ? p.isNew : category === 'Sale' ? p.compare > p.price : category === 'Slides' ? ['Slides', 'Sandals'].includes(p.category) : p.category === category)));
   if (sizeFilter) items = items.filter((p) => p.sizes.includes(Number(sizeFilter)));
@@ -239,10 +240,12 @@ function Shop({ products, category, setCategory, wishlist, onWishlist, onQuickVi
         <div className="filter-group"><h3>Price</h3>{['All prices', 'Under ₹1,500', '₹1,500–₹2,500', '₹2,500–₹3,500', 'Over ₹3,500'].map((price) => <button className="filter-option" key={price} onClick={() => setPriceFilter(price)}><span className={`filter-check ${priceFilter === price ? 'checked' : ''}`}>{priceFilter === price && <Check size={11} />}</span>{price}</button>)}</div>
         <div className="filter-group"><h3>Colour</h3>{['Black', 'Brown', 'White', 'Olive', 'Rose'].map((color) => <button className="filter-option" key={color} onClick={() => setColorFilter(colorFilter === color ? '' : color)}><span className={`filter-check ${colorFilter === color ? 'checked' : ''}`}>{colorFilter === color && <Check size={11} />}</span>{color}</button>)}</div>
         <div className="filter-group"><h3>For</h3>{['Men', 'Women'].map((audience) => <button className="filter-option" key={audience} onClick={() => setAudienceFilter(audienceFilter === audience ? '' : audience)}><span className={`filter-check ${audienceFilter === audience ? 'checked' : ''}`}>{audienceFilter === audience && <Check size={11} />}</span>{audience}</button>)}</div>
-        <button className="clear-filters" onClick={() => { setCategory('All'); setSizeFilter(null); setPriceFilter('All prices'); setColorFilter(''); setAudienceFilter(''); }}>Clear all filters</button>
+        <button className="clear-filters" onClick={clearFilters}>Clear all filters</button>
         <div className="filter-help"><Sparkles size={16} /><p>Need a hand finding your size?</p><button onClick={onSearch}>Ask us anything <ArrowRight size={13} /></button></div>
       </aside>
-      <ProductGrid items={items} wishlist={wishlist} onWishlist={onWishlist} onQuickView={onQuickView} onProduct={onProduct} />
+      <ProductGrid items={items} wishlist={wishlist} onWishlist={onWishlist} onQuickView={onQuickView} onProduct={onProduct}
+        emptyMessage={category === 'Boots' ? 'We are getting this collection ready. Explore the rest of the footwear while we find the right pairs.' : 'No pairs match those filters. Clear them to browse all available footwear.'}
+        emptyActionLabel={category === 'Boots' ? 'Browse all footwear' : 'Clear all filters'} onEmptyAction={clearFilters} />
     </div>
     <Footer onCategory={setCategory} setPage={setPage} storeEmail={storeEmail} storeName={storeName} />
   </main>;
